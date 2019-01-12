@@ -192,3 +192,4 @@ def fit_linear(filename):
         plot_correlation(workable_data, correlation_parameters)
     except Exception as ex:
         print(ex)
+
