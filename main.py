@@ -176,14 +176,13 @@ def plot_correlation(data_dict, parameters):
     pyplot.errorbar(x=x, y=data_dict.get('y'), yerr=data_dict.get('dy'), xerr=data_dict.get('dx'), fmt='none', ecolor='blue')
     pyplot.ylabel(data_dict.get('y axis'))
     pyplot.xlabel(data_dict.get('x axis'))
-    pyplot.show()
+    # pyplot.show()
     pyplot.savefig(fname='linear_fit', format='svg')
 
 
 # Main function
 def fit_linear(filename):
-    # raw_data = open_input_file(filename)
-    raw_data = open_input_file('input_cols.txt')
+    raw_data = open_input_file(filename)
     data_orientation = check_row_or_col(raw_data)
 
     try:
@@ -193,3 +192,5 @@ def fit_linear(filename):
     except Exception as ex:
         print(ex)
 
+
+# fit_linear('input_rows.txt')
