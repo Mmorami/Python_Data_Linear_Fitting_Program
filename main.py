@@ -112,10 +112,18 @@ def calc_z_bar(z, dy):
     return z_bar
 
 
-# calculates chi^2 and chi^ red
+# calculates chi^2
+def calc_chi_sqr(y, a, x, b, dy, n):
+    chi_sqr = 0
+    for i in range(n):
+        chi_sqr += ((y[i] - (a*x[i] + b))/dy[i])**2
+    return chi_sqr
+
+
+# calculates all parameters for the correlation
 # prints the values of a, da, b, db, chi^2, chi^2 red
 # returns a list with all parameters' values
-def calc_chi_sqr(work_data):
+def calc_parameters(work_data):
 
     # defining the basic elements for calculating the factors
     n = len(work_data.get('x'))
@@ -149,9 +157,7 @@ def calc_chi_sqr(work_data):
     db = ((dy_sqr_bar * x_sqr_bar)/(n * (x_sqr_bar - x_bar**2))) ** 0.5
 
     # calculating chi^2 and chi^2 red
-    chi_sqr = 0
-    for i in range(n):
-        chi_sqr += ((y[i] - (a*x[i] + b))/dy[i])**2
+    chi_sqr = calc_chi_sqr(y, a, x, b, dy, n)
     chi_sqr_red = chi_sqr/(n-2)
 
     print("a = {0} +- {1}".format(a, da))
@@ -174,10 +180,90 @@ def plot_correlation(data_dict, parameters):
         f.append(b + i * a)
     pyplot.plot(x, f, 'red')
     pyplot.errorbar(x=x, y=data_dict.get('y'), yerr=data_dict.get('dy'), xerr=data_dict.get('dx'), fmt='none', ecolor='blue')
+    # pyplot.title('{0} as a function of {1}'.format())
     pyplot.ylabel(data_dict.get('y axis'))
     pyplot.xlabel(data_dict.get('x axis'))
-    # pyplot.show()
+    pyplot.show()
     pyplot.savefig(fname='linear_fit', format='svg')
+
+
+# creates a list of the parameters for iteration
+def create_parameter_list(q_data):
+    q_values = []
+    i = q_data[0]
+    while abs(i) <= abs(q_data[1]):
+        q_values.append(i)
+        i += q_data[2]
+    return q_values
+
+
+# Numerically searches for best fit parameters
+def numeric_fit(work_data):
+
+    # defining parameters needed for chi calculation
+    n = len(work_data.get('x'))
+    x = work_data.get('x')
+    y = work_data.get('y')
+    dy = work_data.get('dy')
+
+    a_data = work_data.get('a')
+    b_data = work_data.get('b')
+    a_values = create_parameter_list(a_data)
+    b_values = create_parameter_list(b_data)
+    # defines initial parameters for comparing best a & b pair
+    best_chi = calc_chi_sqr(y, a_values[0], x, b_values[0], dy, n)
+    best_a = a_values[0]
+    best_b = b_values[0]
+
+    for i in a_values:
+        for j in b_values:
+            chi_sqr = calc_chi_sqr(y, i, x, j, dy, n)
+            if chi_sqr < best_chi:
+                best_chi = chi_sqr
+                best_a = i
+                best_b = j
+    best_chi_red = best_chi/(n-2)
+
+    print("a = {0} +- {1}".format(best_a, abs(a_data[2])))
+    print("b = {0} +- {1}".format(best_b, abs(b_data[2])))
+    print("chi2 = {0}".format(best_chi))
+    print("chi2_reduced = {0}".format(best_chi_red))
+
+    parameters = {'a': best_a, 'da': a_data[2], 'b': best_b, 'db': b_data[2], 'a_list': a_values}
+    return parameters
+
+
+# plots chi function
+def plot_chi(work_data, parameters):
+    a = parameters.get('a_list')
+    b = parameters.get('b')
+
+    n = len(work_data.get('x'))
+    x = work_data.get('x')
+    y = work_data.get('y')
+    dy = work_data.get('dy')
+    f = []
+    for i in a:
+        f.append(calc_chi_sqr(y, i, x, b, dy, n))
+
+    pyplot.plot(a, f, 'blue')
+    pyplot.ylabel('chi2(a, b = {0:.2f})'.format(b))
+    pyplot.xlabel('a')
+    pyplot.show()
+    pyplot.savefig(fname='numeric_sampling', format='svg')
+
+
+# Bonus function
+def search_best_parameter(filename):
+    raw_data = open_input_file(filename)
+    data_orientation = check_row_or_col(raw_data)
+    try:
+        workable_data = create_dict(raw_data, data_orientation)
+        correlation_parameters = numeric_fit(workable_data)
+        plot_correlation(workable_data, correlation_parameters)
+        plot_chi(workable_data, correlation_parameters)
+    except Exception as ex:
+        print(ex)
 
 
 # Main function
@@ -187,10 +273,12 @@ def fit_linear(filename):
 
     try:
         workable_data = create_dict(raw_data, data_orientation)
-        correlation_parameters = calc_chi_sqr(workable_data)
+        correlation_parameters = calc_parameters(workable_data)
         plot_correlation(workable_data, correlation_parameters)
     except Exception as ex:
         print(ex)
 
 
-# fit_linear('input_rows.txt')
+fit_linear('input_rows.txt')
+print()
+search_best_parameter('input.txt')
