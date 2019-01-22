@@ -312,3 +312,4 @@ def fit_linear(filename):
 # fit_linear('input_rows.txt')
 # print()
 # search_best_parameter('input.txt')
+
