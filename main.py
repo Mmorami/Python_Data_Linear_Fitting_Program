@@ -193,7 +193,7 @@ def plot_correlation(data_dict, parameters):
     pyplot.errorbar(x=x, y=data_dict.get('y'), yerr=data_dict.get('dy'), xerr=data_dict.get('dx'), fmt='none', ecolor='blue')
     pyplot.ylabel(data_dict.get('y axis'))
     pyplot.xlabel(data_dict.get('x axis'))
-    pyplot.show()
+    # pyplot.show()
     pyplot.savefig(fname='linear_fit', format='svg')
 
 
@@ -279,7 +279,7 @@ def plot_chi(work_data, parameters):
     pyplot.plot(a, f, 'blue')
     pyplot.ylabel('chi2(a, b = {0:.2f})'.format(b))
     pyplot.xlabel('a')
-    pyplot.show()
+    # pyplot.show()
     pyplot.savefig(fname='numeric_sampling', format='svg')
 
 
@@ -309,7 +309,7 @@ def fit_linear(filename):
         print(ex)
 
 
-fit_linear('input_rows.txt')
-print()
-search_best_parameter('input.txt')
+# fit_linear('input_rows.txt')
+# print()
+# search_best_parameter('input.txt')
 
