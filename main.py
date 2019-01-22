@@ -90,6 +90,7 @@ def check_data_validation(data_dict):
 
 
 # inserts the data to a dictionary
+# returns the sorted dictionary
 def create_dict(file, orientation):
     data = strip_data(file)
     if orientation == 'r':
@@ -112,7 +113,8 @@ def calc_z_bar(z, dy):
     return z_bar
 
 
-# calculates chi^2
+# calculates chi^2 for mandatory part
+# returns the chi^2 value
 def calc_chi_sqr(y, a, x, b, dy, n):
     chi_sqr = 0
     for i in range(n):
@@ -170,14 +172,23 @@ def calc_parameters(work_data):
     return parameters
 
 
+# calculates the values (f) of a function with respect to the corresponding parameters and x values
+# returns a list of values
+def calc_linear_values(x, a, b):
+    f = []
+    for i in x:
+        f.append(b + i * a)
+    return f
+
+
 # plots the data
 def plot_correlation(data_dict, parameters):
     x = data_dict.get('x')
     a = parameters.get('a')
     b = parameters.get('b')
-    f = []
-    for i in x:
-        f.append(b + i * a)
+
+    f = calc_linear_values(x, a, b)
+
     pyplot.plot(x, f, 'red')
     pyplot.errorbar(x=x, y=data_dict.get('y'), yerr=data_dict.get('dy'), xerr=data_dict.get('dx'), fmt='none', ecolor='blue')
     pyplot.ylabel(data_dict.get('y axis'))
@@ -187,6 +198,7 @@ def plot_correlation(data_dict, parameters):
 
 
 # creates a list of the parameters for iteration
+# returns the full list of values
 def create_parameter_list(q_data):
     q_values = []
     i = q_data[0]
@@ -196,13 +208,30 @@ def create_parameter_list(q_data):
     return q_values
 
 
+# calculates chi^2 for bonus part
+def calc_chi_sqr_bonus(y, a, x, b, dy, dx, n):
+    x_plus_dx = [x[i] + dx[i] for i in range(n)]
+    x_minus_dx = [x[i] - dx[i] for i in range(n)]
+    f_numerator = calc_linear_values(x, a, b)
+    f_x_plus_dx = calc_linear_values(x_plus_dx, a, b)
+    f_x_minus_dx = calc_linear_values(x_minus_dx, a, b)
+
+    chi_sqr = 0
+    for i in range(n):
+        chi_sqr += ((y[i] - f_numerator[i])/((dy[i])**2 + (f_x_plus_dx[i] - f_x_minus_dx[i])**2)**0.5)**2
+    return chi_sqr
+
+
 # Numerically searches for best fit parameters
+# prints the values of a, da, b, db, chi^2, chi^2 red
+# returns a list with all parameters' values
 def numeric_fit(work_data):
 
     # defining parameters needed for chi calculation
     n = len(work_data.get('x'))
     x = work_data.get('x')
     y = work_data.get('y')
+    dx = work_data.get('dx')
     dy = work_data.get('dy')
 
     a_data = work_data.get('a')
@@ -217,7 +246,7 @@ def numeric_fit(work_data):
 
     for i in a_values:
         for j in b_values:
-            chi_sqr = calc_chi_sqr(y, i, x, j, dy, n)
+            chi_sqr = calc_chi_sqr_bonus(y, i, x, j, dy, dx, n)
             if chi_sqr <= best_chi:
                 best_chi = chi_sqr
                 best_a = i
@@ -241,14 +270,12 @@ def plot_chi(work_data, parameters):
     n = len(work_data.get('x'))
     x = work_data.get('x')
     y = work_data.get('y')
+    dx = work_data.get('dx')
     dy = work_data.get('dy')
 
     f = []
     for i in a:
-        f.append(calc_chi_sqr(y, i, x, b, dy, n))
-
-    print(a)
-    print(f)
+        f.append(calc_chi_sqr_bonus(y, i, x, b, dy, dx, n))
     pyplot.plot(a, f, 'blue')
     pyplot.ylabel('chi2(a, b = {0:.2f})'.format(b))
     pyplot.xlabel('a')
@@ -282,6 +309,6 @@ def fit_linear(filename):
         print(ex)
 
 
-fit_linear('input_rows.txt')
-print()
-search_best_parameter('input.txt')
+# fit_linear('input_rows.txt')
+# print()
+# search_best_parameter('input.txt')
