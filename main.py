@@ -180,7 +180,6 @@ def plot_correlation(data_dict, parameters):
         f.append(b + i * a)
     pyplot.plot(x, f, 'red')
     pyplot.errorbar(x=x, y=data_dict.get('y'), yerr=data_dict.get('dy'), xerr=data_dict.get('dx'), fmt='none', ecolor='blue')
-    # pyplot.title('{0} as a function of {1}'.format())
     pyplot.ylabel(data_dict.get('y axis'))
     pyplot.xlabel(data_dict.get('x axis'))
     pyplot.show()
@@ -210,6 +209,7 @@ def numeric_fit(work_data):
     b_data = work_data.get('b')
     a_values = create_parameter_list(a_data)
     b_values = create_parameter_list(b_data)
+
     # defines initial parameters for comparing best a & b pair
     best_chi = calc_chi_sqr(y, a_values[0], x, b_values[0], dy, n)
     best_a = a_values[0]
@@ -218,14 +218,14 @@ def numeric_fit(work_data):
     for i in a_values:
         for j in b_values:
             chi_sqr = calc_chi_sqr(y, i, x, j, dy, n)
-            if chi_sqr < best_chi:
+            if chi_sqr <= best_chi:
                 best_chi = chi_sqr
                 best_a = i
                 best_b = j
     best_chi_red = best_chi/(n-2)
 
-    print("a = {0} +- {1}".format(best_a, abs(a_data[2])))
-    print("b = {0} +- {1}".format(best_b, abs(b_data[2])))
+    print("a = {0:.2f} +- {1}".format(best_a, abs(a_data[2])))
+    print("b = {0:.2f} +- {1}".format(best_b, abs(b_data[2])))
     print("chi2 = {0}".format(best_chi))
     print("chi2_reduced = {0}".format(best_chi_red))
 
@@ -242,10 +242,13 @@ def plot_chi(work_data, parameters):
     x = work_data.get('x')
     y = work_data.get('y')
     dy = work_data.get('dy')
+
     f = []
     for i in a:
         f.append(calc_chi_sqr(y, i, x, b, dy, n))
 
+    print(a)
+    print(f)
     pyplot.plot(a, f, 'blue')
     pyplot.ylabel('chi2(a, b = {0:.2f})'.format(b))
     pyplot.xlabel('a')
