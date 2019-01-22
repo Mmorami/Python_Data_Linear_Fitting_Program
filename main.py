@@ -240,7 +240,7 @@ def numeric_fit(work_data):
     b_values = create_parameter_list(b_data)
 
     # defines initial parameters for comparing best a & b pair
-    best_chi = calc_chi_sqr(y, a_values[0], x, b_values[0], dy, n)
+    best_chi = calc_chi_sqr_bonus(y, a_values[0], x, b_values[0], dy, dx, n)
     best_a = a_values[0]
     best_b = b_values[0]
 
@@ -309,7 +309,7 @@ def fit_linear(filename):
         print(ex)
 
 
-# fit_linear('input_rows.txt')
-# print()
-# search_best_parameter('input.txt')
+fit_linear('input_rows.txt')
+print()
+search_best_parameter('input.txt')
 
