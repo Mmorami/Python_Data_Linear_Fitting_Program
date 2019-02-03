@@ -195,6 +195,7 @@ def plot_correlation(data_dict, parameters):
     pyplot.xlabel(data_dict.get('x axis'))
     # pyplot.show()
     pyplot.savefig(fname='linear_fit', format='svg')
+    pyplot.gcf().clear()
 
 
 # creates a list of the parameters for iteration
@@ -312,4 +313,3 @@ def fit_linear(filename):
 # fit_linear('input_rows.txt')
 # print()
 # search_best_parameter('input.txt')
-
